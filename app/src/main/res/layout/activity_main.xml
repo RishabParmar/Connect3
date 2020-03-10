@@ -125,18 +125,21 @@
             android:tag="cell_22"
             tools:layout_editor_absoluteX="0dp"
             tools:layout_editor_absoluteY="104dp" />
+
     </GridLayout>
 
     <Button
         android:id="@+id/playAgainButton"
-        android:layout_width="wrap_content"
+        android:layout_width="125dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="26dp"
         android:layout_marginEnd="162dp"
         android:layout_marginStart="162dp"
         android:layout_marginTop="30dp"
+        android:fontFamily="@font/combo"
         android:onClick="playAgain"
         android:text="Play Again"
+        android:textSize="18sp"
         android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -145,32 +148,30 @@
 
     <TextView
         android:id="@+id/winMessage"
-        android:layout_width="79dp"
-        android:layout_height="36dp"
-        android:layout_marginBottom="40dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="45dp"
         android:layout_marginEnd="177dp"
         android:layout_marginStart="177dp"
-        android:layout_marginTop="45dp"
+        android:fontFamily="@font/combo"
+        android:textSize="24sp"
         app:layout_constraintBottom_toTopOf="@+id/gameGrid"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0" />
+        app:layout_constraintStart_toStartOf="parent" />
 
-    <LinearLayout
-        android:id="@+id/blockLayout"
-        android:layout_width="394dp"
-        android:layout_height="398dp"
-        android:background="@android:color/transparent"
-        android:layout_marginBottom="27dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="23dp"
-        android:orientation="horizontal"
-        android:visibility="visible"
-        app:layout_constraintBottom_toTopOf="@+id/playAgainButton"
+    <TextView
+        android:id="@+id/gameTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="177dp"
+        android:layout_marginStart="177dp"
+        android:layout_marginTop="36dp"
+        android:fontFamily="@font/covered_by_your_grace"
+        android:text="Connect3"
+        android:textColor="@android:color/black"
+        android:textSize="48sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/winMessage"/>
+        app:layout_constraintTop_toTopOf="parent" />
 
 </android.support.constraint.ConstraintLayout>

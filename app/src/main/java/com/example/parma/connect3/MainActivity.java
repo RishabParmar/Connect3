@@ -1,13 +1,15 @@
 package com.example.parma.connect3;
 
+import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.GridLayout;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import java.util.Arrays;
 
@@ -29,7 +31,6 @@ public class MainActivity extends AppCompatActivity {
     // Setup the onclick of all the imageviews stored in cellViews
     // Remove the src for image for all the imageviews stored
     // Flush the cellViews array, reset the value of viewCounter = 0 and set isBlue = false
-    // Also lock the gridLayout clicks so that they cannot be touched even after someone has won the game
 
     // Sounds algorithm:
     // Add dropCoin sounds that should be played on click (specifically when the animation has been rendered)
@@ -43,7 +44,8 @@ public class MainActivity extends AppCompatActivity {
     // Did not set the playAgainButton by finding the id because there is no view for the member to work (findViewById won't work)
     // This view is available once onCreate fires
     Button playAgainButton;
-    LinearLayout blockLayout;
+    // For displaying the winner message
+    TextView winMessage;
 
     // Initialising the game board cells to -1 for tracking winning metrics
     public void initializeGameBoardGrid(){
@@ -58,9 +60,8 @@ public class MainActivity extends AppCompatActivity {
         playAgainButton.setVisibility(View.INVISIBLE);
         playAgainButton.setClickable(false);
 
-        // Block Layout
-        blockLayout = findViewById(R.id.blockLayout);
-        blockLayout.setVisibility(View.GONE);
+        // Win Message Textview
+        winMessage = findViewById(R.id.winMessage);
     }
 
     public boolean gameBoardFull(){
@@ -130,6 +131,9 @@ public class MainActivity extends AppCompatActivity {
 
         // Resetting the first chip color to blue
         isBlue = false;
+
+        // Clearing the win Message
+        winMessage.setText("");
     }
 
     public void dropChip(View view) {
@@ -172,14 +176,17 @@ public class MainActivity extends AppCompatActivity {
             Log.i("The win condition has been invoked! ", "Color that has won " + result[1]);
             playAgainButton.setVisibility(View.VISIBLE);
             playAgainButton.setClickable(true);
-            blockLayout.setVisibility(View.VISIBLE);
+            String winColor = "";
+            if(result[1] == 0) { winColor = "The winner is Blue Chip!"; }
+            else { winColor = "The winner is Black Leaf!"; }
+            winMessage.setText(winColor);
         }else if(result[0] == -1 && gameBoardFull()){
             Log.i("Draw!", "The players have drawn the game");
             playAgainButton.setVisibility(View.VISIBLE);
             playAgainButton.setClickable(true);
-            blockLayout.setVisibility(View.VISIBLE);
+            String drawMessage = "Both the players have drawn the game";
+            winMessage.setText(drawMessage);
         }
-
     }
 
     // Play Again Button:
@@ -192,5 +199,11 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initializeGameBoardGrid();
+
+        // For changing the status bar color on the game activity
+        Window window = getWindow();
+        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+        window.setStatusBarColor(Color.parseColor("#FAFAFA"));
     }
 }
