@@ -1,6 +1,7 @@
 package com.example.parma.connect3;
 
 import android.graphics.Color;
+import android.media.MediaPlayer;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -8,6 +9,7 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -46,6 +48,8 @@ public class MainActivity extends AppCompatActivity {
     Button playAgainButton;
     // For displaying the winner message
     TextView winMessage;
+    // Game Title
+    TextView gameTitle;
 
     // Initialising the game board cells to -1 for tracking winning metrics
     public void initializeGameBoardGrid(){
@@ -74,6 +78,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public int[] checkForWin() {
+        Log.i("here: ", Integer.toString(viewCounter));
         // flags[0]: won the game, flags[1]: who won the game, blue(0) or black(1)
         int flags[] = {-1, -1};
 
@@ -154,7 +159,13 @@ public class MainActivity extends AppCompatActivity {
         // Removes the onClick attribute for the Image View in play and freezes the grid cell spot in the play space
         boardCell.setClickable(false);
         boardCell.setY(-1000f);
-        boardCell.animate().translationY(0f).setDuration(500);
+        boardCell.animate().translationY(0f).setDuration(500).withStartAction(new Runnable() {
+            @Override
+            public void run() {
+                MediaPlayer mp = MediaPlayer.create(MainActivity.this, R.raw.dropchip);
+                mp.start();
+            }
+        });
 
         // Update the gameBoard matrix after chip insertion
         String boardCellTag = boardCell.getTag().toString();
@@ -170,16 +181,19 @@ public class MainActivity extends AppCompatActivity {
         gameBoard[boardRow][boardColumn] = cellValue;
         Log.i("Game Board state", Arrays.deepToString(gameBoard));
 
-        // Run the winChecker to regularly check a row, column or a diagonal for a match of 3
-        int result[] = checkForWin();
+        // Run the winChecker to check a row, column or a diagonal for a match of 3 only after 5 chips have been inserted
+        // in the grid as you require either 3blue & 2black or 3black and 2blue to win the game
+        int result[] = viewCounter>=5 ?checkForWin() :new int[2];
         if(result[0] == 1) {
             Log.i("The win condition has been invoked! ", "Color that has won " + result[1]);
             playAgainButton.setVisibility(View.VISIBLE);
             playAgainButton.setClickable(true);
-            String winColor = "";
+            String winColor;
             if(result[1] == 0) { winColor = "The winner is Blue Chip!"; }
             else { winColor = "The winner is Black Leaf!"; }
             winMessage.setText(winColor);
+            MediaPlayer mp = MediaPlayer.create(MainActivity.this, R.raw.win);
+            mp.start();
         }else if(result[0] == -1 && gameBoardFull()){
             Log.i("Draw!", "The players have drawn the game");
             playAgainButton.setVisibility(View.VISIBLE);
@@ -205,5 +219,23 @@ public class MainActivity extends AppCompatActivity {
         window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
         window.setStatusBarColor(Color.parseColor("#FAFAFA"));
+
+        // Game grid animation
+        GridLayout gameGrid = findViewById(R.id.gameGrid);
+        gameGrid.setY(1500f);
+        gameGrid.animate().translationY(0f).setDuration(500).start();
+
+        // Creating the game title animation and playing sounds on it's animation completion
+        gameTitle = findViewById(R.id.gameTitle);
+        gameTitle.setY(-500f);
+        gameTitle.animate().translationY(0f).setDuration(500).withEndAction(new Runnable() {
+            @Override
+            public void run() {
+                MediaPlayer mp = MediaPlayer.create(MainActivity.this, R.raw.gametitle);
+                mp.start();
+            }
+        });
+
+
     }
 }
