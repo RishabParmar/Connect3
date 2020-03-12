@@ -27,6 +27,7 @@ public class MainActivity extends AppCompatActivity {
     // Highlight the winning coins by reducing the alpha level on all the other coins
     // Make the text showing which player has won or the game has been drawn
     // Make the play again button visible which when clicked will run the play again algorithm
+    // Stop any further clicks to the game board as the game shouldn't register any further clicks
 
     // Play again Algorithm(in depth):
     // Initialise the gameBoard values to -1
@@ -43,6 +44,7 @@ public class MainActivity extends AppCompatActivity {
     int viewCounter = 0;
     ImageView[] cellViews = new ImageView[9];
     boolean isBlue = false;
+    boolean isFinished = false;
     // Did not set the playAgainButton by finding the id because there is no view for the member to work (findViewById won't work)
     // This view is available once onCreate fires
     Button playAgainButton;
@@ -78,7 +80,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public int[] checkForWin() {
-        Log.i("here: ", Integer.toString(viewCounter));
         // flags[0]: won the game, flags[1]: who won the game, blue(0) or black(1)
         int flags[] = {-1, -1};
 
@@ -139,52 +140,57 @@ public class MainActivity extends AppCompatActivity {
 
         // Clearing the win Message
         winMessage.setText("");
+
+        // Resetting the game condition
+        isFinished = false;
     }
 
     public void dropChip(View view) {
         int cellValue;
         ImageView boardCell = (ImageView) view;
-        cellViews[viewCounter] = boardCell;
-        viewCounter++;
-        if(!isBlue) {
-            boardCell.setImageResource(R.drawable.blue);
-            cellValue = 0;
-            isBlue = true;
-        }else {
-            boardCell.setImageResource(R.drawable.black);
-            cellValue = 1;
-            isBlue = false;
-        }
-
-        // Removes the onClick attribute for the Image View in play and freezes the grid cell spot in the play space
-        boardCell.setClickable(false);
-        boardCell.setY(-1000f);
-        boardCell.animate().translationY(0f).setDuration(500).withStartAction(new Runnable() {
-            @Override
-            public void run() {
-                MediaPlayer mp = MediaPlayer.create(MainActivity.this, R.raw.dropchip);
-                mp.start();
+        if(!isFinished) {
+            cellViews[viewCounter] = boardCell;
+            viewCounter++;
+            if(!isBlue) {
+                boardCell.setImageResource(R.drawable.blue);
+                cellValue = 0;
+                isBlue = true;
+            }else {
+                boardCell.setImageResource(R.drawable.black);
+                cellValue = 1;
+                isBlue = false;
             }
-        });
 
-        // Update the gameBoard matrix after chip insertion
-        String boardCellTag = boardCell.getTag().toString();
-        Log.i("Cell tag ", boardCellTag);
-        String splitTags[] = boardCellTag.split("_", 0);
-        int boardRow = Integer.parseInt(String.valueOf(splitTags[1].charAt(0)));
-        // Log.i("The row value: ", Integer.toString(boardRow));
-        int boardColumn = Integer.parseInt(String.valueOf(splitTags[1].charAt(1)));
-        // Log.i("The cell value: ", Integer.toString(boardColumn));
+            // Removes the onClick attribute for the Image View in play and freezes the grid cell spot in the play space
+            boardCell.setClickable(false);
+            boardCell.setY(-1000f);
+            boardCell.animate().translationY(0f).setDuration(500).withStartAction(new Runnable() {
+                @Override
+                public void run() {
+                    MediaPlayer mp = MediaPlayer.create(MainActivity.this, R.raw.dropchip);
+                    mp.start();
+                }
+            });
 
-        // Insert the cell value appropriately according to the color of the chip inserted
-        // Blue: 0, Black: 1, Empty board cell: -1
-        gameBoard[boardRow][boardColumn] = cellValue;
-        Log.i("Game Board state", Arrays.deepToString(gameBoard));
+            // Update the gameBoard matrix after chip insertion
+            String boardCellTag = boardCell.getTag().toString();
+            Log.i("Cell tag ", boardCellTag);
+            String splitTags[] = boardCellTag.split("_", 0);
+            int boardRow = Integer.parseInt(String.valueOf(splitTags[1].charAt(0)));
+            // Log.i("The row value: ", Integer.toString(boardRow));
+            int boardColumn = Integer.parseInt(String.valueOf(splitTags[1].charAt(1)));
+            // Log.i("The cell value: ", Integer.toString(boardColumn));
+
+            // Insert the cell value appropriately according to the color of the chip inserted
+            // Blue: 0, Black: 1, Empty board cell: -1
+            gameBoard[boardRow][boardColumn] = cellValue;
+            Log.i("Game Board state", Arrays.deepToString(gameBoard));
+        }
 
         // Run the winChecker to check a row, column or a diagonal for a match of 3 only after 5 chips have been inserted
         // in the grid as you require either 3blue & 2black or 3black and 2blue to win the game
         int result[] = viewCounter>=5 ?checkForWin() :new int[2];
-        if(result[0] == 1) {
+        if(result[0] == 1 && !isFinished) {
             Log.i("The win condition has been invoked! ", "Color that has won " + result[1]);
             playAgainButton.setVisibility(View.VISIBLE);
             playAgainButton.setClickable(true);
@@ -194,12 +200,14 @@ public class MainActivity extends AppCompatActivity {
             winMessage.setText(winColor);
             MediaPlayer mp = MediaPlayer.create(MainActivity.this, R.raw.win);
             mp.start();
-        }else if(result[0] == -1 && gameBoardFull()){
+            isFinished = true;
+        }else if(result[0] == -1 && gameBoardFull() && !isFinished){
             Log.i("Draw!", "The players have drawn the game");
             playAgainButton.setVisibility(View.VISIBLE);
             playAgainButton.setClickable(true);
             String drawMessage = "Both the players have drawn the game";
             winMessage.setText(drawMessage);
+            isFinished = true;
         }
     }
 
@@ -235,7 +243,5 @@ public class MainActivity extends AppCompatActivity {
                 mp.start();
             }
         });
-
-
     }
 }
